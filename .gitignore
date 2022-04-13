@@ -3,3 +3,7 @@
 ################################################################################
 
 /.vs/SoftSunlight.WebSocket/v16
+/SoftSunlight.WebSocket/obj
+/SoftSunlight.WebSocket/bin/Debug/netstandard2.0
+/SoftSunlight.WebSocketTest/bin/Debug/netcoreapp3.1
+/SoftSunlight.WebSocketTest/obj
