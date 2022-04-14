@@ -33,6 +33,10 @@ namespace SoftSunlight.WebSocket.Utils
                     frameBytes += 8;
                     frameBytes += webSocketFrame.ExtPayloadLen;
                 }
+                if (webSocketFrame.Mask)
+                {
+                    frameBytes += 4;
+                }
                 if (frameBytes == requestDatas.Length)
                 {
                     return true;
@@ -213,7 +217,14 @@ namespace SoftSunlight.WebSocket.Utils
                             string[] tempArr = tempStr.Split(' ');
                             simpleHttpResponse.Version = tempArr[0];
                             simpleHttpResponse.StatusCode = tempArr[1];
-                            simpleHttpResponse.StatusMessage = tempArr[2];
+                            if (tempArr.Length > 3)
+                            {
+                                simpleHttpResponse.StatusMessage = string.Join(" ", tempArr.Skip(2));
+                            }
+                            else
+                            {
+                                simpleHttpResponse.StatusMessage = tempArr[2];
+                            }
                         }
                         else
                         {

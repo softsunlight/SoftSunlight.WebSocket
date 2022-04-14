@@ -7,3 +7,8 @@
 /SoftSunlight.WebSocket/bin/Debug/netstandard2.0
 /SoftSunlight.WebSocketTest/bin/Debug/netcoreapp3.1
 /SoftSunlight.WebSocketTest/obj
+/.vs/SoftSunlight.WebSocket/DesignTimeBuild
+/SoftSunlight.WebSocketClientTest/bin/Debug/netcoreapp3.1
+/SoftSunlight.WebSocketClientTest/obj
+/SoftSunlight.WebSocketServerTest/bin/Debug/netcoreapp3.1
+/SoftSunlight.WebSocketServerTest/obj

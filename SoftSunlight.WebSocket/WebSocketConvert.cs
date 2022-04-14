@@ -25,19 +25,26 @@ namespace SoftSunlight.WebSocket
             frameByteList.Add((byte)(128 + webSocketFrame.Opcode));
             byte seconedByteData = 0;
             List<byte> extPayloadLenBytes = new List<byte>();
-            if (webSocketFrame.PayloadData.Length <= 125)
+            if (webSocketFrame.PayloadData == null)
             {
-                seconedByteData = (byte)(webSocketFrame.PayloadData.Length);
-            }
-            else if (webSocketFrame.PayloadData.Length <= ushort.MaxValue)
-            {
-                seconedByteData = 126;
-                extPayloadLenBytes.AddRange(BitConverter.GetBytes((ushort)webSocketFrame.PayloadData.Length));
+                seconedByteData = 0;
             }
             else
             {
-                seconedByteData = 127;
-                extPayloadLenBytes.AddRange(BitConverter.GetBytes((long)webSocketFrame.PayloadData.Length));
+                if (webSocketFrame.PayloadData.Length <= 125)
+                {
+                    seconedByteData = (byte)(webSocketFrame.PayloadData.Length);
+                }
+                else if (webSocketFrame.PayloadData.Length <= ushort.MaxValue)
+                {
+                    seconedByteData = 126;
+                    extPayloadLenBytes.AddRange(BitConverter.GetBytes((ushort)webSocketFrame.PayloadData.Length));
+                }
+                else
+                {
+                    seconedByteData = 127;
+                    extPayloadLenBytes.AddRange(BitConverter.GetBytes((long)webSocketFrame.PayloadData.Length));
+                }
             }
             if (webSocketFrame.Mask)
             {
@@ -53,7 +60,10 @@ namespace SoftSunlight.WebSocket
                 //掩码
                 frameByteList.AddRange(webSocketFrame.MaskingKey);
             }
-            frameByteList.AddRange(webSocketFrame.PayloadData);
+            if (webSocketFrame.PayloadData != null)
+            {
+                frameByteList.AddRange(webSocketFrame.PayloadData);
+            }
             return frameByteList.ToArray();
         }
         /// <summary>
@@ -120,7 +130,7 @@ namespace SoftSunlight.WebSocket
             {
                 //数据
                 byte[] encodeDatas = new byte[realLen];
-                Array.Copy(datas, maskKeyStart + webSocketFrame.MaskingKey.Length, encodeDatas, 0, realLen);
+                Array.Copy(datas, maskKeyStart + (webSocketFrame.MaskingKey != null ? webSocketFrame.MaskingKey.Length : 0), encodeDatas, 0, realLen);
                 if (webSocketFrame.Mask)
                 {
                     //解码

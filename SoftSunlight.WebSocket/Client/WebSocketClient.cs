@@ -2,12 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-namespace SoftSunlight.WebSocket
+namespace SoftSunlight.WebSocket.Client
 {
     /// <summary>
     /// WebSocket客户端
@@ -77,21 +78,28 @@ namespace SoftSunlight.WebSocket
             //客户端发送的帧必须经过掩码处理，否则断开WebSocket连接
             webSocketFrame.Mask = true;
             webSocketFrame.MaskingKey = BitConverter.GetBytes(new Random().Next(int.MinValue, int.MaxValue));
-            byte[] encodeData = new byte[sendDatas.Length];
-            //掩码处理
-            for (var i = 0; i < sendDatas.Length; i++)
+            if (sendDatas == null)
             {
-                encodeData[i] = (byte)(sendDatas[i] ^ webSocketFrame.MaskingKey[i % 4]);
-            }
-            webSocketFrame.PayloadData = encodeData;
-            webSocketFrame.ExtPayloadLen = webSocketFrame.PayloadData.Length;
-            if (webSocketFrame.PayloadData.Length > 126 && webSocketFrame.PayloadData.Length <= ushort.MaxValue)
-            {
-                webSocketFrame.PayloadLen = 126;
+                webSocketFrame.PayloadLen = 0;
             }
             else
             {
-                webSocketFrame.PayloadLen = 127;
+                byte[] encodeData = new byte[sendDatas.Length];
+                //掩码处理
+                for (var i = 0; i < sendDatas.Length; i++)
+                {
+                    encodeData[i] = (byte)(sendDatas[i] ^ webSocketFrame.MaskingKey[i % 4]);
+                }
+                webSocketFrame.PayloadData = encodeData;
+                webSocketFrame.ExtPayloadLen = webSocketFrame.PayloadData.Length;
+                if (webSocketFrame.PayloadData.Length > 126 && webSocketFrame.PayloadData.Length <= ushort.MaxValue)
+                {
+                    webSocketFrame.PayloadLen = 126;
+                }
+                else
+                {
+                    webSocketFrame.PayloadLen = 127;
+                }
             }
             if (client.Connected)
             {
@@ -107,6 +115,7 @@ namespace SoftSunlight.WebSocket
 
                 }
             }
+
         }
         /// <summary>
         /// 启动WebSocket
@@ -176,26 +185,37 @@ namespace SoftSunlight.WebSocket
                         frames.Add(webSocketFrame);
                         if (webSocketFrame.Fin)
                         {
-                            //if (webSocketFrame.Opcode == OpcodeEnum.Text || webSocketFrame.Opcode == OpcodeEnum.Binary)
-                            //{
-                            //    //httpContext.WebSocket
-                            //}
-                            //开始处理WebSocket请求
+                            //服务端发送的数据帧不作掩码处理
+                            if (webSocketFrame.Mask)
+                            {
+                                break;
+                            }
+                            if (webSocketFrame.Opcode == (int)OpcodeEnum.Text || webSocketFrame.Opcode == (int)OpcodeEnum.Binary)
+                            {
+                                OnMessage?.Invoke(frames.SelectMany(p => p.PayloadData).ToArray());
+                            }
+                            else
+                            {
+                                if (webSocketFrame.Opcode == (int)OpcodeEnum.Close)
+                                {
+                                    break;
+                                }
+                                else if (webSocketFrame.Opcode == (int)OpcodeEnum.Ping)
+                                {
+                                    Send(OpcodeEnum.Pong, null);
+                                }
+                            }
+                            frames.Clear();
                         }
                     }
                     else
                     {
+                        Log.Write(Encoding.UTF8.GetString(responseDatas));
                         SimpleHttpResponse simpleHttpResponse = HttpUtils.GetSimpleHttpResponse(responseDatas);
                         if (simpleHttpResponse == null)
                         {
-                            if (OnError != null)
-                            {
-                                OnError("服务端无响应!");
-                            }
-                            if (OnClose != null)
-                            {
-                                OnClose();
-                            }
+                            OnError?.Invoke("服务端无响应!");
+                            OnClose?.Invoke();
                         }
                         else
                         {
@@ -203,51 +223,34 @@ namespace SoftSunlight.WebSocket
                             {
                                 if (simpleHttpResponse.ResponseHeaders != null && simpleHttpResponse.ResponseHeaders.ContainsKey("Sec-WebSocket-Accept"))
                                 {
-                                    if (OnOpen != null)
-                                    {
-                                        OnOpen();
-                                    }
+                                    OnOpen?.Invoke();
                                 }
                                 else
                                 {
-                                    if (OnError != null)
-                                    {
-                                        OnError("the WebSocket not Accept");
-                                    }
-                                    if (OnClose != null)
-                                    {
-                                        OnClose();
-                                    }
+                                    OnError?.Invoke("the WebSocket not Accept");
+                                    OnClose?.Invoke();
                                 }
                             }
                             else
                             {
-                                if (OnError != null)
-                                {
-                                    OnError(simpleHttpResponse.StatusMessage);
-                                }
-                                if (OnClose != null)
-                                {
-                                    OnClose();
-                                }
+                                OnError?.Invoke(simpleHttpResponse.StatusMessage);
+                                OnClose?.Invoke();
                             }
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    if (networkStream != null)
-                    {
-                        networkStream.Close();
-                        networkStream.Dispose();
-                    }
                     if (client != null)
                     {
                         client.Close();
                     }
+                    OnClose?.Invoke();
+                    //Log.Write("接收数据异常", ex);
                     break;
                 }
             }
+            OnClose?.Invoke();
         }
 
         /// <summary>

@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30717.126
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoftSunlight.WebSocket", "SoftSunlight.WebSocket\SoftSunlight.WebSocket.csproj", "{A61B4FD3-F0B6-4B81-B033-CE611697FEC6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoftSunlight.WebSocket", "SoftSunlight.WebSocket\SoftSunlight.WebSocket.csproj", "{A61B4FD3-F0B6-4B81-B033-CE611697FEC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoftSunlight.WebSocketTest", "SoftSunlight.WebSocketTest\SoftSunlight.WebSocketTest.csproj", "{B41D7713-42CB-4B65-A3D8-E6879165D2E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoftSunlight.WebSocketClientTest", "SoftSunlight.WebSocketClientTest\SoftSunlight.WebSocketClientTest.csproj", "{B41D7713-42CB-4B65-A3D8-E6879165D2E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoftSunlight.WebSocketServerTest", "SoftSunlight.WebSocketServerTest\SoftSunlight.WebSocketServerTest.csproj", "{606215C6-17A9-4BAD-9FB5-1BA3D7F17DCE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{B41D7713-42CB-4B65-A3D8-E6879165D2E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B41D7713-42CB-4B65-A3D8-E6879165D2E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B41D7713-42CB-4B65-A3D8-E6879165D2E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{606215C6-17A9-4BAD-9FB5-1BA3D7F17DCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{606215C6-17A9-4BAD-9FB5-1BA3D7F17DCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{606215C6-17A9-4BAD-9FB5-1BA3D7F17DCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{606215C6-17A9-4BAD-9FB5-1BA3D7F17DCE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
