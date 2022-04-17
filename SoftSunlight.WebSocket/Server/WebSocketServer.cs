@@ -199,7 +199,7 @@ namespace SoftSunlight.WebSocket.Server
                                             }
                                             catch (Exception ex)
                                             {
-                                                Log.Write("处理WebSocket连接出错", ex);
+                                                throw ex;
                                             }
                                             finally
                                             {
@@ -225,12 +225,10 @@ namespace SoftSunlight.WebSocket.Server
                                     }
                                     else
                                     {
-                                        //不知道为什么，每次有个空连接
+                                        //对方关闭了连接，接收数据会一直为空
                                         if (tcpClient != null)
                                         {
                                             tcpClient.Close();
-                                            tcpClient.Dispose();
-                                            tcpClient = null;
                                         }
                                         break;
                                     }
@@ -240,8 +238,6 @@ namespace SoftSunlight.WebSocket.Server
                                     if (tcpClient != null)
                                     {
                                         tcpClient.Close();
-                                        tcpClient.Dispose();
-                                        tcpClient = null;
                                     }
                                     //Log.Write("接收数据异常", ex);
                                     break;
@@ -251,6 +247,7 @@ namespace SoftSunlight.WebSocket.Server
                             {
                                 tcpClient.Close();
                             }
+                            WebSocketManager.Remove(tcpClient);
                         });
                     }
                 });

@@ -5,10 +5,17 @@ using System.Text;
 
 namespace SoftSunlight.WebSocket.Server
 {
+    /// <summary>
+    /// WebSocket管理
+    /// </summary>
     internal class WebSocketManager
     {
         private static Dictionary<TcpClient, WebSocket> tcpClient2WebSocket = new Dictionary<TcpClient, WebSocket>();
         private static readonly object lockObj = new object();
+        /// <summary>
+        /// 添加WebSocket
+        /// </summary>
+        /// <param name="tcpClient"></param>
         public static void Add(TcpClient tcpClient)
         {
             lock (lockObj)
@@ -19,7 +26,11 @@ namespace SoftSunlight.WebSocket.Server
                 }
             }
         }
-
+        /// <summary>
+        /// 获取WebSocket
+        /// </summary>
+        /// <param name="tcpClient"></param>
+        /// <returns></returns>
         public static WebSocket Get(TcpClient tcpClient)
         {
             if (tcpClient2WebSocket.ContainsKey(tcpClient))
@@ -28,6 +39,20 @@ namespace SoftSunlight.WebSocket.Server
             }
             return null;
         }
-
+        /// <summary>
+        /// 移除WebSocket
+        /// </summary>
+        /// <param name="tcpClient"></param>
+        public static void Remove(TcpClient tcpClient)
+        {
+            if (tcpClient2WebSocket.ContainsKey(tcpClient))
+            {
+                tcpClient2WebSocket.Remove(tcpClient);
+            }
+        }
+        public static Socket[] GetAll()
+        {
+            return tcpClient2WebSocket.Values;
+        }
     }
 }

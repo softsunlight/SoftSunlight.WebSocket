@@ -59,7 +59,6 @@ namespace SoftSunlight.WebSocket.Server
                     networkStream = client.GetStream();
                     byte[] data = WebSocketConvert.ConvertToByte(webSocketFrame);
                     networkStream.Write(data, 0, data.Length);
-                    networkStream.Flush();
                 }
                 catch (Exception ex)
                 {

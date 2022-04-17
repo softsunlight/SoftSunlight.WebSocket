@@ -12,3 +12,6 @@
 /SoftSunlight.WebSocketClientTest/obj
 /SoftSunlight.WebSocketServerTest/bin/Debug/netcoreapp3.1
 /SoftSunlight.WebSocketServerTest/obj
+/SoftSunlight.WebSocket/bin/Release/netstandard2.0
+/SoftSunlight.WebSocketServerTest/bin/Release/netcoreapp3.1
+/SoftSunlight.WebSocketServerTest/Properties
