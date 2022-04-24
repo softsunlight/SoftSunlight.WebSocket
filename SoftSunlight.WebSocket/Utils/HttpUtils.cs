@@ -268,5 +268,42 @@ namespace SoftSunlight.WebSocket.Utils
             }
             return simpleHttpResponse;
         }
+        /// <summary>
+        /// 获取WebSocket数据帧长度
+        /// </summary>
+        /// <param name="requestDatas"></param>
+        /// <returns></returns>
+        public static long GetWebSocketFrameLength(byte[] requestDatas)
+        {
+            try
+            {
+                WebSocketFrame webSocketFrame = WebSocketConvert.ConvertToFrame(requestDatas);
+                long frameBytes = 2;
+                if (webSocketFrame.PayloadLen <= 125)
+                {
+                    frameBytes += webSocketFrame.PayloadLen;
+                }
+                else if (webSocketFrame.PayloadLen == 126)
+                {
+                    frameBytes += 2;
+                    frameBytes += webSocketFrame.ExtPayloadLen;
+                }
+                else if (webSocketFrame.PayloadLen == 127)
+                {
+                    frameBytes += 8;
+                    frameBytes += webSocketFrame.ExtPayloadLen;
+                }
+                if (webSocketFrame.Mask)
+                {
+                    frameBytes += 4;
+                }
+                return frameBytes;
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return 0;
+        }
     }
 }

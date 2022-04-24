@@ -50,9 +50,5 @@ namespace SoftSunlight.WebSocket.Server
                 tcpClient2WebSocket.Remove(tcpClient);
             }
         }
-        public static Socket[] GetAll()
-        {
-            return tcpClient2WebSocket.Values;
-        }
     }
 }

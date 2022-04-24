@@ -63,15 +63,15 @@ namespace SoftSunlight.WebSocket.Server
                 autoResetEvent.WaitOne();
             }
             WebSocket defaultWebSocket = null;
-            //lock (webSocketTcpClientQueueObj)
-            //{
-            if (webSocketTcpClientQueue.Count > 0)
+            lock (webSocketTcpClientQueueObj)
             {
-                TcpClient tcpClient = webSocketTcpClientQueue.Dequeue();
-                defaultWebSocket = WebSocketManager.Get(tcpClient);
+                if (webSocketTcpClientQueue.Count > 0)
+                {
+                    TcpClient tcpClient = webSocketTcpClientQueue.Dequeue();
+                    defaultWebSocket = WebSocketManager.Get(tcpClient);
+                }
+                autoResetEvent.Reset();
             }
-            autoResetEvent.Reset();
-            //}
             return defaultWebSocket;
         }
 
@@ -99,6 +99,7 @@ namespace SoftSunlight.WebSocket.Server
                         Task.Run(() =>
                         {
                             List<WebSocketFrame> frames = new List<WebSocketFrame>();
+                            List<byte> webSocketDataList = new List<byte>();
                             while (true)
                             {
                                 //http1.1 默认是持久链接
@@ -121,41 +122,43 @@ namespace SoftSunlight.WebSocket.Server
                                         if (memoryStream != null)
                                         {
                                             memoryStream.Close();
-                                            memoryStream.Dispose();
-                                            memoryStream = null;
                                         }
-                                        if (HttpUtils.IsWebSocket(requestDatas))
+                                        WebSocket webSocket = WebSocketManager.Get(tcpClient);
+                                        if (webSocket != null)
                                         {
-                                            WebSocketFrame webSocketFrame = WebSocketConvert.ConvertToFrame(requestDatas);
-                                            frames.Add(webSocketFrame);
-                                            if (webSocketFrame.Fin)
+                                            webSocketDataList.AddRange(requestDatas);
+                                            long frameLength = HttpUtils.GetWebSocketFrameLength(webSocketDataList.ToArray());
+                                            while (webSocketDataList.Count > frameLength)
                                             {
-                                                //客户端发送的数据帧必须掩码处理
-                                                if (!webSocketFrame.Mask)
+                                                WebSocketFrame webSocketFrame = WebSocketConvert.ConvertToFrame(webSocketDataList.ToArray());
+                                                frames.Add(webSocketFrame);
+                                                if (webSocketFrame.Fin)
                                                 {
-                                                    break;
-                                                }
-                                                WebSocket webSocket = WebSocketManager.Get(tcpClient);
-                                                if (webSocket == null)
-                                                {
-                                                    break;
-                                                }
-                                                if (webSocketFrame.Opcode == (int)OpcodeEnum.Text || webSocketFrame.Opcode == (int)OpcodeEnum.Binary)
-                                                {
-                                                    webSocket.OnMessage?.Invoke(frames.SelectMany(p => p.PayloadData).ToArray());
-                                                }
-                                                else
-                                                {
-                                                    if (webSocketFrame.Opcode == (int)OpcodeEnum.Close)
+                                                    //客户端发送的数据帧必须掩码处理
+                                                    if (!webSocketFrame.Mask)
                                                     {
                                                         break;
                                                     }
-                                                    //else if (webSocketFrame.Opcode == (int)OpcodeEnum.Ping)
-                                                    //{
-                                                    //    //Send(OpcodeEnum.Pong, null);
-                                                    //}
+
+                                                    if (webSocketFrame.Opcode == (int)OpcodeEnum.Text || webSocketFrame.Opcode == (int)OpcodeEnum.Binary)
+                                                    {
+                                                        webSocket.OnMessage?.Invoke(frames.SelectMany(p => p.PayloadData).ToArray());
+                                                    }
+                                                    else
+                                                    {
+                                                        if (webSocketFrame.Opcode == (int)OpcodeEnum.Close)
+                                                        {
+                                                            break;
+                                                        }
+                                                        //else if (webSocketFrame.Opcode == (int)OpcodeEnum.Ping)
+                                                        //{
+                                                        //    //Send(OpcodeEnum.Pong, null);
+                                                        //}
+                                                    }
+                                                    frames.Clear();
                                                 }
-                                                frames.Clear();
+                                                webSocketDataList = webSocketDataList.Skip((int)frameLength).ToList();
+                                                frameLength = HttpUtils.GetWebSocketFrameLength(webSocketDataList.ToArray());
                                             }
                                         }
                                         else

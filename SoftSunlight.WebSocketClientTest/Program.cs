@@ -11,7 +11,7 @@ namespace SoftSunlight.WebSocketTest
     {
         static void Main(string[] args)
         {
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 50; i++)
             {
                 int j = i;
                 Task.Run(() =>
@@ -25,9 +25,9 @@ namespace SoftSunlight.WebSocketTest
                     };
                     client.OnMessage += (byte[] data) =>
                     {
-                        int i = Convert.ToInt32(Encoding.UTF8.GetString(data));
-                        Console.WriteLine($"{id}:" + i);
-                        client.Send((++i).ToString());
+                        //int i = Convert.ToInt32(Encoding.UTF8.GetString(data));
+                        //Console.WriteLine($"{id}:" + i);
+                        //client.Send((++i).ToString());
                     };
                     client.OnClose += () =>
                     {
